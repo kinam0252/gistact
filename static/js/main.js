@@ -726,6 +726,9 @@
       return { l, vb, st: $(".st", l) };
     };
     const A = lane("Text Reasoning VLA", `reasons once, ${L.toFixed(1)}\xA0s`, cot, false), B = lane("GistAct", `thinks in ${TH}\xA0s`, me, true);
+    [A.vb.v, B.vb.v].forEach((v) => {
+      v.preload = "auto";
+    });
     const hold = el("div", "hold", '<span class="hl">Reasoning\u2026</span><p class="cotov"></p><i class="rbar"><b></b></i>'), ov = $(".cotov", hold), rb = $(".rbar b", hold);
     A.vb.box.append(hold);
     const flash = el("span", "tflash", `Think \xB7 ${TH} s`);
