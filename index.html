@@ -19,9 +19,9 @@
     <a class="brand" href="#top"><svg class="gm" width="24" height="24" viewBox="0 0 32 32" aria-hidden="true"><circle cx="2.9" cy="29.1" r="2" style="fill:var(--acc)"/><circle cx="7.6" cy="24.4" r="2.6" style="fill:var(--acc)"/><path d="M11.5 7.5v-5h5M24.5 2.5h5v5M29.5 15.5v5h-5M16.5 20.5h-5v-5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="square"/><circle cx="20.5" cy="11.5" r="3.3" style="fill:var(--acc)"/></svg><span>GistAct</span></a>
     <div class="links">
       <a href="#overview"><i>01</i>Overview</a>
-      <a href="#real"><i>02</i>Real robot</a>
+      <a href="#real"><i>02</i>Real<span class="xl"> robot</span></a>
       <a href="#analysis"><i>03</i>Analysis</a>
-      <a href="#sim"><i>04</i>Simulation</a>
+      <a href="#sim"><i>04</i>Sim<span class="xl">ulation</span></a>
       <a href="#bibtex"><i>05</i>BibTeX</a>
     </div>
     <button class="tt" type="button" data-theme-toggle aria-label="Switch to light mode">
@@ -33,7 +33,7 @@
 
 <main id="main">
 <header class="hero" id="top">
-  <div class="wrap" data-cid="hero">
+  <div class="wrap">
     <h1><span class="acc">GistAct</span>: Thinking in Latents, Acting on Grounded Answers</h1>
     <p class="authors"><span>Kinam Kim<sup>1,2</sup></span> <span>Minho Park<sup>2</sup></span> <span>Min-Hung Chen<sup>1</sup></span> <span>Zhiding Yu<sup>1</sup></span> <span>Fu-En Yang<sup>1</sup></span> <span>Yu-Chiang Frank Wang<sup>1</sup></span> <span>Jaegul Choo<sup>2</sup></span> <span>Chi-Pin Huang<sup>1</sup></span></p>
     <div class="meta">
@@ -43,7 +43,7 @@
     <div class="pills">
       <span class="pill off" title="Available with the paper">Paper</span>
       <span class="pill off" title="Available with the paper">arXiv</span>
-      <span class="pill off" title="Available with the code">Code <small>soon</small></span>
+      <span class="pill off" title="Available with the code">Code</span>
       <a class="pill" href="#bibtex">BibTeX</a>
     </div>
     </div>
@@ -51,68 +51,83 @@
 </header>
 
 <div class="wrap tz">
-  <div class="teaser" data-cid="teaser">
+  <div class="teaser">
     <video id="teaser" muted loop playsinline preload="metadata" poster="static/media/teaser.jpg" aria-label="Overview video"><source src="static/media/teaser.mp4" type="video/mp4"></video>
   </div>
-  <p class="tldr">GistAct thinks in a few latent states, marks the answer in the image, and acts at the speed of a plain policy.</p>
+  <p class="tzcap">On a real robot and in three simulators, GistAct works out instructions that name no object, where baselines guess.</p>
+  <dl class="stats" aria-label="Main results">
+    <div><dt>Real robot</dt><dd><b>66.3%</b><span>vs 47.5% π0.5</span></dd></div>
+    <div><dt>RoboSPA</dt><dd><b>67.8%</b><span>vs 42.8% Pointing-VLA</span></dd></div>
+    <div><dt>VLABench</dt><dd><b>59.4%</b><span>vs 52.7% ERVLA</span></dd></div>
+    <div><dt>Time per decision</dt><dd><b>0.15&nbsp;s</b><span>vs 15.7&nbsp;s ERVLA</span></dd></div>
+  </dl>
 </div>
 
 <section id="overview">
   <div class="wrap">
-    <div class="head rv" data-cid="overview">
+    <div class="head rv">
       <p class="eyebrow"><i>01</i>Overview</p>
       <h2>Think in a few grounded states, then act on the answer.</h2>
     </div>
-    <div class="fig rv" id="fig" data-cid="overview.fig"></div>
-    <details class="more figcap rv" data-cid="overview.train"><summary>How the states are trained</summary><div class="train" id="trainFig"></div></details>
+    <div class="fig rv" id="fig"></div>
+    <details class="more figcap rv"><summary>How the states are trained</summary><div class="train" id="trainFig"></div></details>
   </div>
 </section>
 
 <section id="real">
   <div class="wrap">
-    <div class="head rv" data-cid="real">
+    <div class="head rv">
       <p class="eyebrow"><i>02</i>Real robot</p>
       <h2>Hard instructions on a real robot.</h2>
-      <p class="cue">None of these instructions names the object.</p>
-      <p class="num"><b>66.3%</b> average success on hard instructions, against 47.5% for π0.5.</p>
+      <p class="cue">None of these instructions names the object. <span class="num"><b>66.3%</b> average success, against 47.5% for π0.5.</span></p>
     </div>
     <div class="tabs rv" id="realTabs" role="tablist" aria-label="Instruction type"></div>
-    <div class="rv" id="realPlayer" data-cid="real.player"></div>
+    <div class="rv" id="realPlayer"></div>
   </div>
 </section>
 
 <section id="analysis">
   <div class="wrap">
-    <div class="head rv" data-cid="analysis">
+    <div class="head rv">
       <p class="eyebrow"><i>03</i>Analysis</p>
       <h2>Latent Think runs fast, and editing it steers the arm.</h2>
     </div>
     <div class="sub" id="speed">
-      <div class="head rv" data-cid="analysis.speed"><h3>Reasoning in text is slow.</h3></div>
+      <div class="head rv"><h3>Reasoning in text is slow.</h3></div>
       <div class="race rv" id="race"></div>
     </div>
     <div class="sub" id="steer">
-      <div class="head rv" data-cid="analysis.steer"><h3>Edit one Think state, and the arm follows.</h3></div>
+      <div class="head rv"><h3>Edit one Think state, and the arm follows.</h3></div>
       <div class="rv" id="steerPlayer"></div>
       <p class="stat rv"><b>87.0%</b> of episodes follow an edited Think, against <b>21.6%</b> when Think is not supervised.</p>
+    </div>
+    <div class="sub" id="ablate">
+      <div class="head rv"><h3>Think helps only when its states are supervised.</h3></div>
+      <figure class="abl rv">
+        <div class="ar"><span>Act only, without Think</span><i style="--v:40.2"></i><b>40.2</b></div>
+        <div class="ar"><span>+ latent Think, unsupervised</span><i style="--v:34.1"></i><b>34.1</b></div>
+        <div class="ar"><span>+ supervised Think states</span><i style="--v:55.0"></i><b>55.0</b></div>
+        <div class="ar me"><span>GistAct</span><i style="--v:67.8"></i><b>67.8</b></div>
+        <figcaption>RoboSPA success (%), one component added per row.</figcaption>
+      </figure>
     </div>
   </div>
 </section>
 
 <section id="sim">
   <div class="wrap">
-    <div class="head rv" data-cid="sim">
+    <div class="head rv">
       <p class="eyebrow"><i>04</i>Simulation</p>
-      <h2>The same behaviour in simulation.</h2>
+      <h2>The same behaviour in&nbsp;simulation.</h2>
     </div>
     <div class="tabs rv" id="simTabs" role="tablist" aria-label="Benchmark"></div>
-    <div class="rv" id="simPlayer" data-cid="sim.player"></div>
-    <div class="tablewrap rv" data-cid="sim.table" id="simTable"></div>
+    <div class="rv" id="simPlayer"></div>
+    <div class="tablewrap rv" id="simTable"></div>
   </div>
 </section>
 
 <section id="bibtex">
-  <div class="wrap" data-cid="bibtex">
+  <div class="wrap">
     <div class="head"><p class="eyebrow"><i>05</i>Cite</p><h2>BibTeX</h2></div>
     <div class="bibbox"><button class="copy" id="copyBib" type="button">Copy</button>
 <pre id="bib">@article{kim2026gistact,
@@ -126,15 +141,9 @@
 </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <label class="switch" hidden><input type="checkbox" id="reviewToggle"><span>Review mode</span></label>
-  </div>
-</footer>
 
 <script src="static/js/data.js"></script>
-<script src="static/js/episodes.js" onerror="void 0"></script>
-<script src="static/js/think_overrides.js" onerror="void 0"></script>
+<script src="static/js/think.js" onerror="void 0"></script>
 <script src="static/js/real_v2.js" onerror="void 0"></script>
 <script src="static/js/real_baselines.js" onerror="void 0"></script>
 <script src="static/js/edit_v2.js" onerror="void 0"></script>
@@ -143,6 +152,5 @@
 <script src="static/js/robolab_lb.js" onerror="void 0"></script>
 <script src="static/js/sim_v2.js" onerror="void 0"></script>
 <script src="static/js/main.js"></script>
-<script src="static/js/gallery_link.js"></script>
 </body>
 </html>
