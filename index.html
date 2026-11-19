@@ -54,7 +54,7 @@
   <div class="teaser">
     <video id="teaser" muted loop playsinline preload="metadata" poster="static/media/teaser.jpg" aria-label="Overview video"><source src="static/media/teaser.mp4" type="video/mp4"></video>
   </div>
-  <p class="tzcap">On a real robot and in three simulators, GistAct works out instructions that name no object, where baselines guess.</p>
+  <p class="tzcap">On a real robot and in three simulators, GistAct finds the right object even when the instruction never names it.</p>
   <p class="tldr"><span class="tl">TL;DR</span>GistAct thinks in a few latent states you can decode and read, marks its answer in the image, and acts on it 100× faster than reasoning in text.</p>
   <div class="stats" role="group" aria-label="Main results">
     <figure class="sm"><figcaption>Real robot · success</figcaption>
@@ -80,7 +80,7 @@
   <div class="wrap">
     <div class="head rv">
       <p class="eyebrow"><i>01</i>Overview</p>
-      <h2>Think in a few grounded states, then act on the answer.</h2>
+      <h2>Reason in a few latent steps, mark the target, then act.</h2>
     </div>
     <div class="fig rv" id="fig"></div>
     <details class="more figcap rv"><summary>How the states are trained</summary><div class="train" id="trainFig"></div></details>
@@ -91,7 +91,7 @@
   <div class="wrap">
     <div class="head rv">
       <p class="eyebrow"><i>02</i>Real robot</p>
-      <h2>Hard instructions on a real robot.</h2>
+      <h2>Indirect instructions on a real robot.</h2>
       <p class="cue">None of these instructions names the object. <span class="num"><b>66.3%</b> average success, against 47.5% for π0.5.</span></p>
     </div>
     <div class="tabs rv" id="realTabs" role="tablist" aria-label="Instruction type"></div>
@@ -103,7 +103,7 @@
   <div class="wrap">
     <div class="head rv">
       <p class="eyebrow"><i>03</i>Analysis</p>
-      <h2>Latent Think runs fast, and editing it steers the arm.</h2>
+      <h2>Think is fast, and editing it steers the arm.</h2>
     </div>
     <div class="sub" id="speed">
       <div class="head rv"><h3>Reasoning in text is slow.</h3></div>
@@ -112,12 +112,12 @@
     <div class="sub" id="steer">
       <div class="head rv"><h3>Edit one Think state, and the arm follows.</h3></div>
       <div class="rv" id="steerPlayer"></div>
-      <p class="stat rv"><b>87.0%</b> of episodes follow an edited Think, against <b>21.6%</b> when Think is not supervised.</p>
+      <p class="stat rv"><b>87.0%</b> of episodes follow the edited Think, vs. <b>21.6%</b> without Think supervision.</p>
     </div>
     <div class="sub" id="ablate">
       <div class="head rv"><h3>Think helps only when its states are supervised.</h3></div>
       <figure class="abl rv">
-        <div class="ar"><span>Act only, without Think</span><i style="--v:40.2"></i><b>40.2</b></div>
+        <div class="ar"><span>Act only (no Think)</span><i style="--v:40.2"></i><b>40.2</b></div>
         <div class="ar"><span>+ latent Think, unsupervised</span><i style="--v:34.1"></i><b>34.1</b></div>
         <div class="ar"><span>+ supervised Think states</span><i style="--v:55.0"></i><b>55.0</b></div>
         <div class="ar me"><span>GistAct</span><i style="--v:67.8"></i><b>67.8</b></div>
@@ -131,7 +131,7 @@
   <div class="wrap">
     <div class="head rv">
       <p class="eyebrow"><i>04</i>Simulation</p>
-      <h2>The same behaviour in&nbsp;simulation.</h2>
+      <h2>Indirect instructions in&nbsp;simulation.</h2>
     </div>
     <div class="tabs rv" id="simTabs" role="tablist" aria-label="Benchmark"></div>
     <div class="rv" id="simPlayer"></div>

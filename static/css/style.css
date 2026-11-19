@@ -931,9 +931,7 @@ details.more > p {
   align-items: center;
 }
 .dout {
-  display: flex;
-  gap: 10px;
-  align-items: baseline;
+  display: block;
   margin: 10px 0 0;
   font-size: 18px;
   color: var(--text2);
@@ -2326,4 +2324,13 @@ table.res.big {
   right: 0;
   top: calc(100% + 38px);
   z-index: 2;
+}
+.obj {
+  font-style: normal;
+  font-weight: 650;
+  color: var(--bad);
+}
+.ok .obj,
+.dout.ok .obj {
+  color: var(--acc);
 }
