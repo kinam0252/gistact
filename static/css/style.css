@@ -356,7 +356,7 @@ li {
   margin-top: 48px;
 }
 section {
-  padding: 136px 0 0;
+  padding: 80px 0 0;
 }
 #bibtex {
   padding-bottom: 96px;
@@ -415,7 +415,7 @@ section {
   margin-top: 0;
 }
 .sub + .sub {
-  margin-top: 104px;
+  margin-top: 64px;
 }
 .sub .head {
   margin-bottom: 24px;
@@ -1506,7 +1506,7 @@ details.more > p {
   margin: 32px 0 0;
 }
 .tablewrap {
-  margin-top: 40px;
+  margin-top: 28px;
 }
 .ttabs {
   margin-bottom: 12px;
@@ -1881,13 +1881,13 @@ table.res.big {
     margin-top: 48px;
   }
   section {
-    padding: 96px 0 0;
+    padding: 56px 0 0;
   }
   #bibtex {
     padding-bottom: 64px;
   }
   .sub + .sub {
-    margin-top: 72px;
+    margin-top: 44px;
   }
   .head {
     margin-bottom: 20px;
@@ -2351,4 +2351,7 @@ table.res.big {
 }
 .card .dtag {
   background: var(--panel);
+}
+.tablewrap.card .res thead th {
+  background: var(--ov);
 }
