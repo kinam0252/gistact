@@ -150,7 +150,7 @@
     ctx.fillText(text, bx + px, by + bh / 2 + d);
   }
   const segsOf = (th, grasp, names = []) => !th || !th.goal ? [] : [].concat(th.goal).map((q, i) => ({ t0: i ? q.t || 0 : 0, t1: q.until != null ? q.until : grasp, g: q, name: names[i] || "" }));
-  const NAMES = { real_sem26_r0: ["strawberry"], real_pos06_r0: ["corn"], real_rank_indist_7390047_r0: ["tangerine", "tray"], real_sort_indist_7090001_r0: ["grapes", "lemon", "eggplant", "tangerine"], edit2_pos02_r0_lemon: ["strawberry"], "edit2_pos02_r0_lemon/edit": ["lemon"], robolab_lb_XrSmallestItemTask_ep1001: ["lychee", "bowl"], robolab_lb_XrSmallerThanTask_ep0: ["lemon", "lime"], vlabench_v05: ["Spider-Man", "box"], robospa_r06: ["red apple"] };
+  const NAMES = { real_sem26_r0: ["strawberry"], real_pos06_r0: ["corn"], real_rank_indist_7390047_r0: ["tangerine", "tray"], real_sort_indist_7090001_r0: ["grapes", "lemon", "eggplant", "tangerine"], edit2_pos02_r0_lemon: ["strawberry"], "edit2_pos02_r0_lemon/edit": ["lemon"], robolab_lb_XrSmallestItemTask_ep1001: ["lychee", "bowl"], robolab_lb_XrSmallerThanTask_ep0: ["lemon", "lime"] };
   const gripOf = (id) => /^robolab/.test(id) ? { x: 0.655, y: 0.36 } : /^vlabench/.test(id) ? { x: 0.6, y: 0.3 } : /^robospa/.test(id) ? { x: 0.74, y: 0.2 } : { x: 0.67, y: 0.32 };
   const zoomWin = (zo) => {
     const w = 1 / zo.z;
@@ -180,6 +180,8 @@
     return `background-image:url('${c.poster}');background-size:${(W / s * 100).toFixed(1)}% ${(H / s * 100).toFixed(1)}%;background-position:${(L * 100).toFixed(1)}% ${(T * 100).toFixed(1)}%`;
   };
   const glowAt = (t, t1) => t1 == null ? 1 : clamp((t1 - t) / 0.45);
+  const E = Infinity, OUT = { real_sem26_r0: { ours: 7.4, base: E, ervla: 12.6, lara: E }, real_pos06_r0: { ours: 7.5, base: E, ervla: E, lara: 5.8 }, real_rank_indist_7390047_r0: { ours: 10.1, base: 5.7, ervla: 12.8, lara: 12.1 }, real_sort_indist_7090001_r0: { ours: 43.2, base: E, ervla: 13.8, lara: 10 }, robolab_lb_XrSmallestItemTask_ep1001: { ours: 20.6, base: 11.4 }, robolab_lb_XrSmallerThanTask_ep0: { ours: 38, base: 43.5 } };
+  const ocOn = (v, t1) => (v.currentTime || 0) >= (t1 ?? E) || !!v.dataset.done;
   function scrubber(bar, dur, seek, hold, cur) {
     bar.tabIndex = 0;
     bar.setAttribute("role", "slider");
@@ -215,7 +217,7 @@
       seek(Math.max(0, Math.min(d - 0.1, cur() + k)));
     });
   }
-  function vbox(c, { tag = null, me = false, bar = false } = {}) {
+  function vbox(c, { tag = null, me = false, bar = false, oc = null } = {}) {
     const box = el("div", "vbox"), v = document.createElement("video"), cv = document.createElement("canvas"), rate = Math.min(2, c && c.rate || 1);
     Object.assign(v, { muted: true, playsInline: true, preload: "none" });
     v.setAttribute("muted", "");
@@ -232,7 +234,8 @@
     box.append(v, cv);
     if (tag) box.append(el("span", "tag" + (me ? " me" : ""), tag));
     if (rate !== 1) box.append(el("span", "tag spd", rate + "\xD7"));
-    const r = { box, v, cv, missing: false, bar: null };
+    if (oc) box.append(el("span", "ocb " + oc, oc === "ok" ? "<i>\u2713</i>Success" : "<i>\u2717</i>Fail"));
+    const r = { box, v, cv, missing: false, bar: null, res: (on) => box.classList.toggle("oc-" + oc, !!on) };
     if (bar) {
       r.bar = el("div", "bar");
       box.append(r.bar);
@@ -250,7 +253,7 @@
     r.miss = miss;
     return r;
   }
-  const T_IN = 350, T_IHOLD = 2e3, T_GLIDE = 550, T_STEP = 1500, T_FOLD = 1800, T_BLOOM = 500, T_ANS = 1800, T_GAP = 2e3;
+  const T_IN = 350, T_IHOLD = 2e3, T_GLIDE = 550, T_STEP = 1500, T_BLOOM = 500, T_ANS = 1800, T_GAP = 2e3;
   const T_BIRTH = 450, T_DOTS = 250, T_DEC = 300, T_FLY = 450;
   const stepMs = (s) => Math.max(T_STEP, 800 + 25 * (s.text || "").length) + T_DOTS + T_DEC;
   const backOut = (x) => {
@@ -267,32 +270,26 @@
   };
   const PLAYERS = window.GA_PLAYERS = new Set();
   const built = () => window.GA_onBuild && window.GA_onBuild();
-  function seq(host, { clip, think, grasp = null, instr = null, strip = [], fold = false, tag = "GistAct", score = null, ctx = {}, cid = null, names = [], duo = null }) {
+  function seq(host, { clip, think, grasp = null, instr = null, strip = [], tag = "GistAct", score = null, ctx = {}, cid = null, names = [], duo = null, okT = null }) {
     host.innerHTML = "";
-    const Zw = clip && clip.zoom ? zoomWin(clip.zoom) : null, th = think || {}, steps = th.steps || [], g0 = zmap(Zw, gripOf(ctx.ep || ""));
+    const Zw = clip && clip.zoom ? zoomWin(clip.zoom) : null, th = think || {}, steps = th.steps || [], g0 = zmap(Zw, th.grip || gripOf(ctx.ep || ""));
     const segs = segsOf(th, grasp, names).map((sg) => Object.assign(sg, { g: zmap(Zw, sg.g) }));
     const tI = instr ? T_IHOLD + T_GLIDE : 0;
-    let showT = !fold, at = [], tThink = 0, tPre = 0;
-    const plan = () => {
-      at = [];
-      let T = tI;
-      if (!showT) T += duo ? 0 : T_FOLD;
-      else steps.forEach((s, i) => {
-        at.push(T);
-        T += stepMs(s) + (i ? 0 : T_BIRTH);
-      });
-      tThink = T;
-      tPre = T + (duo && !showT ? 0 : T_ANS);
-    };
-    plan();
+    const at = [];
+    let T = tI;
+    steps.forEach((s, i) => {
+      at.push(T);
+      T += stepMs(s) + (i ? 0 : T_BIRTH);
+    });
+    const tThink = T, tPre = T + T_ANS;
     const ip = instr ? el("p", "instr", `<q>${esc(instr)}</q>`) : null, iq = ip && $("q", ip);
     if (ip) host.append(ip);
-    const grid = el("div", "pgrid" + (duo ? " duo" : "")), vb = vbox(clip, { tag: esc(tag) + (score != null ? ` <b>${score.toFixed(1)}%</b>` : ""), me: true, bar: true }), pan = el("div", "panel");
-    const bl = duo ? vbox(duo.clip, { tag: esc(duo.name) }) : null;
+    const grid = el("div", "pgrid" + (duo ? " duo" : strip.length ? " side" : "")), vb = vbox(clip, { tag: esc(tag) + (score != null ? ` <b>${score.toFixed(1)}%</b>` : ""), me: true, bar: true, oc: "ok" }), pan = el("div", "panel");
+    const bl = duo ? vbox(duo.clip, { tag: esc(duo.name), oc: "bad" }) : null;
     if (duo) {
       const L = el("div", "dcol"), Rr = el("div", "dcol");
-      L.append(bl.box, el("p", "dout", `<i>\u2715</i>${esc(duo.note || "")}`));
-      Rr.append(vb.box, el("p", "dout ok", `<i>\u2713</i>${esc(duo.ok || "")}`));
+      L.append(bl.box, el("p", "dout", esc(duo.note || "")));
+      Rr.append(vb.box, el("p", "dout ok", esc(duo.ok || "")));
       grid.append(L, Rr, pan);
     } else grid.append(vb.box, pan);
     host.append(grid);
@@ -332,9 +329,9 @@
       return `${s.kind === "V" ? crop(s) : ""}<div class="tx"><b>Think \xB7 ${s.kind === "V" ? "Vision" : "Language"}</b><p>${s.was ? diffHtml(s.was, s.text) : esc(s.text || "")}</p></div>`;
     };
     const tiles = strip.map((s) => {
-      const m = el("div", "tile"), t = vbox(s.clip);
+      const m = el("div", "tile"), t = vbox(s.clip, { oc: "bad" });
       m.append(t.box, el("div", "nm", `<b>${esc(s.name)}</b>${s.score != null ? `<span>${s.score.toFixed(1)}%</span>` : ""}`), el("p", "", esc(s.note || "")));
-      return { m, t };
+      return { m, t, t1: s.t };
     });
     const st = el("div", "strip n" + tiles.length);
     tiles.forEach((x) => st.append(x.m));
@@ -351,22 +348,6 @@
     const prow = el("div", "prow");
     prow.append(ctl);
     pan.append(prow);
-    if (fold) {
-      if (steps.length) {
-        const tg = el("button", "tgl", "Show Think");
-        tg.type = "button";
-        tg.setAttribute("aria-pressed", "false");
-        tg.onclick = () => {
-          showT = !showT;
-          tg.textContent = showT ? "Hide Think" : "Show Think";
-          tg.setAttribute("aria-pressed", String(showT));
-          plan();
-          jump(showT ? 1 : 0);
-        };
-        if (duo) ctl.prepend(tg);
-        else pan.append(tg);
-      }
-    }
     if (tiles.length) pan.append(st);
     const vids = [vb.v, ...bl ? [bl.v] : [], ...tiles.map((x) => x.t.v)];
     const p = { clock: 0, phase: -1, on: false, alive: true, key: "", bkey: "", wait: 0, host, ctx, vids, scrub: false };
@@ -455,7 +436,7 @@
     }, () => vb.v.currentTime);
     const SM = { l: null, t: null, last: 0, ci: -1, d: dots.map(() => ({})) };
     const keepOut = (BW, BH) => {
-      const T = $$(".tag", vb.box).filter((t) => t.offsetWidth).map((t) => [t.offsetLeft - 8, t.offsetTop - 8, t.offsetWidth + 16, t.offsetHeight + 16]), R = [];
+      const T2 = $$(".tag", vb.box).filter((t) => t.offsetWidth).map((t) => [t.offsetLeft - 8, t.offsetTop - 8, t.offsetWidth + 16, t.offsetHeight + 16]), R = [];
       const box = (r, up) => {
         const hx = Math.max(r.rx * BW, 14) + 10, hy = Math.max(r.ry * BH, 14) + 10;
         return [r.cx * BW - hx, r.cy * BH - hy - up, 2 * hx, 2 * hy + up];
@@ -468,7 +449,7 @@
       segs.forEach((sg, i) => {
         if (!i || sg.name && said.includes(sg.name.toLowerCase())) R.push(box(sg.g, 34));
       });
-      return { T, R };
+      return { T: T2, R };
     };
     const place = (BW, BH, bw, bh, gx, gy) => {
       const m = 8, lift = Math.max(NEED, BH * 0.08), { T: TG, R } = keepOut(BW, BH), G = [gx - 26, gy - 26, 52, 52], under = Math.max(m, ...$$(".tag", vb.box).map((t) => t.offsetTop + t.offsetHeight + 12));
@@ -484,7 +465,7 @@
     };
     function bubble(t, k) {
       const BW = vb.box.clientWidth, BH = vb.box.clientHeight, u = p.clock - tThink;
-      if (!(showT && steps.length && BW && (p.phase === 0 || p.phase === 1 && u < T_FLY))) {
+      if (!(steps.length && BW && (p.phase === 0 || p.phase === 1 && u < T_FLY))) {
         vb.box.classList.remove("thinking");
         bub.style.opacity = 0;
         dots.forEach((d) => {
@@ -499,13 +480,13 @@
       const s0 = segs[0], gp = gripAt(g0, s0 && s0.g, grasp || s0 && s0.t1, 0), gx = gp.x * BW, gy = gp.y * BH;
       const bw = bub.offsetWidth, bh = bub.offsetHeight;
       if (first) SM.ci = -1;
-      const [L, T] = place(BW, BH, bw, bh, gx, gy);
+      const [L, T2] = place(BW, BH, bw, bh, gx, gy);
       if (first) {
         SM.l = L;
-        SM.t = T;
+        SM.t = T2;
       } else {
         SM.l += (L - SM.l) * lag(140);
-        SM.t += (T - SM.t) * lag(140);
+        SM.t += (T2 - SM.t) * lag(140);
       }
       const ox0 = gx < SM.l ? -1 : gx > SM.l + bw ? 1 : 0, oy0 = gy < SM.t ? -1 : gy > SM.t + bh ? 1 : 0, cc = ox0 && oy0 ? 9 : 0;
       const ex = ox0 < 0 ? SM.l - 4 + cc : ox0 > 0 ? SM.l + bw + 4 - cc : Math.min(SM.l + bw - 22, Math.max(SM.l + 22, gx)), ey = oy0 < 0 ? SM.t - 4 + cc : oy0 > 0 ? SM.t + bh + 4 - cc : Math.min(SM.t + bh - 12, Math.max(SM.t + 12, gy));
@@ -561,10 +542,10 @@
     function render() {
       const t = vb.v.currentTime || 0, u = p.clock - tThink;
       let k = -1, g = 0, bloom = 1, mk = segs.length ? segs[0] : null;
-      if (p.phase === 0 && showT && steps.length) {
+      if (p.phase === 0 && steps.length) {
         k = steps.length - 1;
         while (k > 0 && at[k] > p.clock) k--;
-      } else if (p.phase === 1) g = bloom = REDUCED ? 1 : ease((u - (showT && steps.length ? 450 : 0)) / T_BLOOM);
+      } else if (p.phase === 1) g = bloom = REDUCED ? 1 : ease((u - (steps.length ? 450 : 0)) / T_BLOOM);
       else if (p.phase === 2) segs.forEach((sg, i) => {
         const gl = Math.min(i ? clamp((t - sg.t0) / 0.4) : 1, glowAt(t, sg.t1));
         if (gl > 0) {
@@ -575,11 +556,24 @@
       if (fitCanvas(vb.cv)) {
         const c = vb.cv.getContext("2d"), W = vb.cv.width, H = vb.cv.height;
         c.clearRect(0, 0, W, H);
-        if (g > 0 && mk && (!duo || showT)) drawMark(c, W, H, mk.g, g, bloom, mk.name);
+        const fly = p.phase === 1 ? REDUCED ? 1 : ease(u / T_FLY) : 0, kk = p.phase === 0 ? k : p.phase === 1 && fly < 1 ? steps.length - 1 : -1;
+        steps.forEach((s, j) => {
+          if (j > kk || s.kind !== "V" || s.cx == null) return;
+          const dd = REDUCED ? 1 : ease((p.clock - at[j] - (j ? 0 : T_BIRTH) - T_DOTS) / T_DEC);
+          drawMark(c, W, H, zmap(Zw, s), (j === kk && p.phase === 0 ? dd : 0.4) * (1 - fly), dd, "", "#eef2ef", 1.8);
+        });
+        if (g > 0 && mk) drawMark(c, W, H, mk.g, g, bloom, mk.name);
       }
       if (duo) {
-        const okT = segs.length && segs[0].t1 != null ? segs[0].t1 + 0.3 : Infinity, on = p.phase === 2 && (t >= okT || !!vb.v.dataset.done);
-        grid.querySelectorAll(".dout").forEach((d) => d.classList.toggle("on", on));
+        const okT2 = duo.okT ?? (segs.length && segs[0].t1 != null ? segs[0].t1 + 0.3 : Infinity), [dB, dO] = grid.querySelectorAll(".dout");
+        const onO = p.phase === 2 && (t >= okT2 || !!vb.v.dataset.done), onB = duo.t == null ? onO : p.phase === 2 && ocOn(bl.v, duo.t);
+        dO.classList.toggle("on", onO);
+        dB.classList.toggle("on", onB);
+        vb.res(onO);
+        bl.res(onB);
+      } else {
+        vb.res(p.phase === 2 && ocOn(vb.v, okT));
+        tiles.forEach((x) => x.t.res(p.phase === 2 && ocOn(x.t.v, x.t1)));
       }
       if (ib) {
         const u2 = p.phase === -1 ? p.clock : 1e9, k2 = REDUCED ? u2 < T_IHOLD ? 0 : 1 : ease((u2 - T_IHOLD) / T_GLIDE), x = clamp((k2 - 0.8) / 0.2);
@@ -715,78 +709,121 @@
     upd();
   })();
   const instrOf = (e) => sentence(e.instruction);
-  const COT_TEXT = "Count the objects from the left. First: the lemon. Second: the corn.";
+  const RACE_F = 2, RACE_FF = 30, RACE_HOLD = 5e3;
+  const laneAt = (L, T) => {
+    let c = 0, s = 0, k = -1;
+    for (const [t, ms] of L.d) {
+      if (T < c + t - s) return { k, sim: s + T - c };
+      c += t - s;
+      s = t;
+      k++;
+      if (T < c + ms) return { k, think: true, p: (T - c) / ms, sim: s, t0: c };
+      c += ms;
+    }
+    return { k, sim: Math.min(L.dur, s + T - c), done: T >= c + L.dur - s };
+  };
+  const decSum = (L) => L.d.reduce((a, x) => a + x[1], 0), laneEnd = (L) => L.dur + decSum(L), decEnd = (L) => L.d[L.d.length - 1][0] + decSum(L);
   (() => {
-    const host = $("#race"), e = byId(R2, "real_pos06_r0"), cot = blArm("real_pos06_r0", "ervla_cot"), me = clipOf(e, "ours");
-    const L = cot && cot.latency_s || 15.68, TH = 0.15, F = 2;
-    const clock = el("div", "clock", '<span class="lab">Shared clock \xB7 2\xD7</span><b>0.0 s</b>');
+    const RC = window.GA_RACE, host = $("#race");
+    if (!RC) {
+      host.closest(".sub").hidden = true;
+      return;
+    }
+    const CT = RC.cot, ME = RC.ours, N = CT.d.length, tok1 = CT.d[0][2], tokAll = CT.d.reduce((a, x) => a + x[2], 0);
+    const aEnd = laneEnd(CT), bEnd = laneEnd(ME), ffA = bEnd, ffB = decEnd(CT), tEnd = Math.max(aEnd, bEnd);
+    const clock = el("div", "clock", '<span class="lab"></span><b></b>'), lab = $(".lab", clock), clk = $("b", clock);
     const lane = (name, sub, c, mine) => {
-      const l = el("div", "lane" + (mine ? " me" : "")), vb = vbox(c);
+      const l = el("div", "lane" + (mine ? " me" : "")), vb = vbox(c, { oc: "ok" });
       l.append(el("div", "who", `<b>${name}</b><span class="lab">${sub}</span>`), vb.box, el("p", "st"));
-      return { l, vb, st: $(".st", l) };
+      return { l, vb, v: vb.v, st: $(".st", l) };
     };
-    const A = lane("Text Reasoning VLA", `reasons once, ${L.toFixed(1)}\xA0s`, cot, false), B = lane("GistAct", `thinks in ${TH}\xA0s`, me, true);
-    [A.vb.v, B.vb.v].forEach((v) => {
+    const A = lane("Text Reasoning VLA", "writes out its reasoning", CT, false), B = lane("GistAct", "thinks in latent states", ME, true);
+    [A.v, B.v].forEach((v) => {
       v.preload = "auto";
     });
-    const hold = el("div", "hold", '<span class="hl">Reasoning\u2026</span><p class="cotov"></p><i class="rbar"><b></b></i>'), ov = $(".cotov", hold), rb = $(".rbar b", hold);
+    const hold = el("div", "hold", '<div class="hrow"><span class="hl">Reasoning\u2026</span><span class="dk"></span></div><div class="cotov"><p></p></div><div class="hrow tkr"><span class="tk"></span></div><i class="rbar"><b></b></i>');
+    const ov = $(".cotov p", hold), dk = $(".dk", hold), tk = $(".tk", hold), rb = $(".rbar b", hold);
     A.vb.box.append(hold);
-    const flash = el("span", "tflash", `Think \xB7 ${TH} s`);
+    const flash = el("span", "tflash");
     B.vb.box.append(flash);
-    host.append(el("p", "instr", `<q>${esc(instrOf(e))}</q>`), clock, A.l, B.l);
-    const clk = $("b", clock), fmt = (s) => s.toFixed(1) + "\xA0s";
-    const S = { on: false, sim: 0, aDone: null, bDone: null, wait: 0 };
+    const num = (n) => n.toLocaleString("en-US");
+    host.append(el("p", "instr", `<q>${esc(sentence(RC.instruction))}</q>`), clock, A.l, B.l, el("p", "tot", `Decision time <b>${decSum(CT).toFixed(0)}&nbsp;s</b> vs&nbsp;<b>${decSum(ME).toFixed(1)}&nbsp;s</b> \xB7 Text&nbsp;tokens <b>${num(tokAll)}</b> vs&nbsp;<b>none</b> (latent&nbsp;states)`));
+    const fmtC = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "0")}`;
+    const done = (s) => "Done in " + (s < 60 ? s.toFixed(1) + " s" : `${Math.floor(Math.round(s) / 60)}:${String(Math.round(s) % 60).padStart(2, "0")}`);
+    const set = (n, x) => {
+      if (n.textContent !== x) n.textContent = x;
+    };
+    const S = { on: false, T: 0, wait: 0 };
+    const seek = (v, t) => {
+      if (!v.seeking && Math.abs(v.currentTime - t) > 0.04) try {
+        v.currentTime = t;
+      } catch (x) {
+      }
+    };
+    const drive = (ln, L, st, ff) => {
+      const v = ln.v;
+      if (ln.vb.missing) return;
+      if (st.done || st.think || ff) {
+        if (!v.paused) v.pause();
+        seek(v, st.done ? L.dur - 0.05 : ff && st.k >= 0 ? L.d[st.k][0] : st.sim);
+        return;
+      }
+      v.playbackRate = RACE_F;
+      if (Math.abs(v.currentTime - st.sim) > 0.35) seek(v, st.sim);
+      if (v.paused) play(v);
+    };
+    const render = () => {
+      const T = S.T, ff = T >= ffA && T < ffB, a = laneAt(CT, T), b = laneAt(ME, T);
+      set(lab, ff ? `\u25B8\u25B8 ${RACE_FF}\xD7 clock` : `Shared clock \xB7 ${RACE_F}\xD7`);
+      clock.classList.toggle("ff", ff);
+      set(clk, fmtC(T));
+      const first = !!a.think && a.k === 0, on = !a.done && (!!a.think || ff), pg = first ? clamp((T - a.t0) / CT.gen1) : a.think ? a.p : 1;
+      const tokens = CT.d.slice(0, Math.max(0, a.k)).reduce((s, x) => s + x[2], 0) + (a.k >= 0 ? Math.round(CT.d[a.k][2] * pg) : 0);
+      hold.classList.toggle("lite", !first);
+      A.vb.box.classList.toggle("frozen", on);
+      set(ov, first ? CT.text1.slice(0, Math.round(CT.text1.length * pg)) : "");
+      set(dk, `decision ${Math.max(1, a.k + 1)} / ${N}`);
+      set(tk, `${num(first ? Math.round(tok1 * pg) : tokens)} tokens`);
+      rb.style.width = (100 * (a.think ? a.p : 1)).toFixed(1) + "%";
+      const bd = b.k >= 0 ? ME.d[b.k] : null, since = bd ? T - (ME.d.slice(0, b.k).reduce((s, x) => s + x[1], 0) + bd[0]) : 99;
+      if (bd) set(flash, `${bd[2] ? "Think" : "Decision"} \xB7 ${bd[1].toFixed(2)} s`);
+      flash.style.opacity = !b.done && since < 2.4 ? 1 : 0;
+      set(A.st, T >= aEnd ? done(aEnd) : on ? "Reasoning" : "Moving");
+      A.vb.res(T >= aEnd);
+      B.vb.res(b.done);
+      set(B.st, b.done ? done(bEnd) : b.think ? "Thinking" : "Moving");
+      [A, B].forEach((x) => x.st.classList.toggle("done", /^Done/.test(x.st.textContent)));
+      return { a, b, ff };
+    };
     const reset = () => {
       clearTimeout(S.wait);
-      Object.assign(S, { sim: 0, aDone: null, bDone: null, wait: 0 });
-      [A.vb.v, B.vb.v].forEach((v) => {
+      Object.assign(S, { T: 0, wait: 0 });
+      [A.v, B.v].forEach((v) => {
         v.pause();
         try {
           v.currentTime = 0;
         } catch (x) {
         }
       });
-      ov.textContent = "";
-      A.st.textContent = B.st.textContent = "";
-    };
-    const run = (ln, pre) => {
-      const v = ln.vb.v;
-      if (ln.vb.missing) return S.sim;
-      if (S.sim < pre) {
-        if (!v.paused) v.pause();
-        return null;
-      }
-      v.playbackRate = F;
-      if (v.paused && !v.ended) play(v);
-      return v.ended ? pre + (v.duration || 0) : null;
+      render();
     };
     TICKS.add((dt) => {
       if (!S.on || S.wait || ![A.vb, B.vb].every((q) => q.missing || q.v.readyState >= 2)) return;
-      if (S.aDone == null || S.bDone == null) S.sim += F * dt / 1e3;
-      if (S.bDone == null) {
-        S.bDone = run(B, TH);
-        B.st.textContent = S.bDone != null ? "Done in " + fmt(S.bDone) : "Moving";
-      }
-      if (S.aDone == null) {
-        S.aDone = run(A, L);
-        A.st.textContent = S.aDone != null ? "Done in " + fmt(S.aDone) : S.sim < L ? "Reasoning" : "Moving";
-      }
-      const k = clamp(S.sim / L), txt = k < 1 ? COT_TEXT.slice(0, Math.round(COT_TEXT.length * clamp(k * 3))) : "";
-      if (ov.textContent !== txt) ov.textContent = txt;
-      rb.style.width = 100 * k + "%";
-      A.vb.box.classList.toggle("frozen", S.sim < L && !A.vb.missing);
-      flash.style.opacity = S.sim < 1.2 ? 1 : 0;
-      [A, B].forEach((x) => x.st.classList.toggle("done", /^Done/.test(x.st.textContent)));
-      clk.textContent = fmt(S.aDone != null && S.bDone != null ? Math.max(S.aDone, S.bDone) : S.sim);
-      if (S.aDone != null && S.bDone != null) S.wait = setTimeout(() => {
-        reset();
-        S.wait = 0;
-      }, 5e3);
+      const ff = S.T >= ffA && S.T < ffB;
+      const lag = !ff && [[A, CT], [B, ME]].some(([ln, L]) => {
+        const s = laneAt(L, S.T);
+        return !ln.vb.missing && !s.done && !s.think && !ln.v.paused && ln.v.currentTime < s.sim - 0.3;
+      });
+      if (!lag) S.T = Math.min(tEnd, S.T + (ff ? RACE_FF : RACE_F) * dt / 1e3);
+      const r = render();
+      drive(A, CT, r.a, r.ff);
+      drive(B, ME, r.b, r.ff);
+      if (S.T >= tEnd) S.wait = setTimeout(reset, RACE_HOLD);
     });
     reset();
     visible(host, (o) => {
       S.on = o;
-      [A.vb.v, B.vb.v].forEach((v) => {
+      [A.v, B.v].forEach((v) => {
         if (o) load(v);
         else v.pause();
       });
@@ -934,8 +971,8 @@
     chips($("#realTabs"), tracks.map((e) => esc(TRACK[e.group] || e.group)), (i) => {
       const e = tracks[i];
       if (cur) cur.dispose();
-      const strip = [["\u03C00.5", "\u03C00.5", clipOf(e, "base"), "base"], ["ERVLA", "ERVLA", blArm(e.id, "ervla"), "ervla"], ["LaRA", "LaRA-VLA", blArm(e.id, "lara"), "lara"]].map(([name, m, clip, arm]) => ({ name, clip, score: avg(m), note: (FAILS[e.id] || {})[arm] || "" }));
-      cur = seq(host, { clip: clipOf(e, "ours"), think: e.think, grasp: GRASP[e.id], instr: instrOf(e), strip, ctx: { ep: e.id, task: TRACK[e.group] }, cid: "real", names: NAMES[e.id] });
+      const strip = [["\u03C00.5", "\u03C00.5", clipOf(e, "base"), "base"], ["ERVLA", "ERVLA", blArm(e.id, "ervla"), "ervla"], ["LaRA", "LaRA-VLA", blArm(e.id, "lara"), "lara"]].map(([name, m, clip, arm]) => ({ name, clip, score: avg(m), note: (FAILS[e.id] || {})[arm] || "", t: (OUT[e.id] || {})[arm] }));
+      cur = seq(host, { clip: clipOf(e, "ours"), think: e.think, grasp: GRASP[e.id], instr: instrOf(e), strip, okT: (OUT[e.id] || {}).ours, ctx: { ep: e.id, task: TRACK[e.group] }, cid: "real", names: NAMES[e.id] });
     });
   })();
   (() => {
@@ -949,12 +986,12 @@
       };
       const ours = arm("gistact", "ours"), base = arm("pi05", "base"), o = r.pi05_outcome || r.pi05Outcome || base && (base.outcome_text || base.note) || r.outcome || "";
       const think = r.think || (r.steps || r.goal ? { steps: r.steps || [], goal: r.goal, avoid: r.avoid } : OV[r.id] || null);
-      return ours && { label: r.label || (r.short ? "RoboLab: " + r.short : "RoboLab " + (i + 1)), x: { id: r.id, clip: ours, think, ok: r.ok, grasp: r.grasp ?? ours.grasp ?? null, instr: sentence(r.instruction || ""), strip: base ? [{ name: "\u03C00.5", clip: base, note: sentence(o) }] : [] } };
+      const oc = OUT[r.id] || {};
+      return ours && { label: r.label || (r.short ? "RoboLab: " + r.short : "RoboLab " + (i + 1)), x: { id: r.id, clip: ours, think, ok: r.ok, okT: oc.ours, grasp: r.grasp ?? ours.grasp ?? null, instr: sentence(r.instruction || ""), strip: base ? [{ name: "\u03C00.5", clip: base, note: sentence(o), t: oc.base }] : [] } };
     }).filter(Boolean);
-    const S2 = (window.GA_SIM2 || []).map((r) => [r.bench, r.label, { id: r.id, clip: r.clips.ours, think: { steps: r.steps, goal: r.goal }, ok: r.ok, grasp: null, instr: r.instruction, strip: r.clips.base ? [{ name: r.base_name, clip: r.clips.base, note: r.base_outcome }] : [] }]);
+    const S2 = (window.GA_SIM2 || []).map((r) => [r.bench, r.label, { id: r.id, clip: r.clips.ours, think: { steps: r.steps, goal: r.goal, grip: r.grip }, ok: r.ok, okT: r.ok_t, grasp: r.grasp ?? null, instr: r.instruction, names: r.names, strip: r.clips.base ? [{ name: r.base_name, clip: r.clips.base, note: r.base_outcome, t: r.base_t }] : [] }]);
     const cap = (s) => s ? s[0].toUpperCase() + s.slice(1) : s;
-    const pickS2 = (bench, id) => S2.filter((x) => x[0] === bench).sort((p, q) => (q[2].id === id) - (p[2].id === id)).slice(0, 1);
-    const SIMS = [...pickS2("RoboSPA", "robospa_r06"), ...pickS2("VLABench", "vlabench_v05"), ...RLB.filter((r) => r.x.strip.length).slice(0, 2).map((r) => ["RoboLab", cap(r.label.replace(/^RoboLab:\s*/, "").replace(/^the /, "").replace(" the ", " ")), r.x])];
+    const SIMS = [...S2.filter((x) => x[0] === "RoboSPA"), ...S2.filter((x) => x[0] === "VLABench"), ...RLB.filter((r) => r.x.strip.length).slice(0, 2).map((r) => ["RoboLab", cap(r.label.replace(/^RoboLab:\s*/, "").replace(/^the /, "").replace(" the ", " ")), r.x])];
     const host = $("#simPlayer");
     let cur = null, tablePick = null;
     chips($("#simTabs"), SIMS.map((s) => esc(s[1])), (i) => {
@@ -962,8 +999,8 @@
       if (tablePick && tk != null) tablePick(tk);
       $("#simTable").hidden = tk == null;
       if (cur) cur.dispose();
-      const b0 = x.strip[0], nm2 = (NAMES[x.id] || [])[0];
-      cur = seq(host, Object.assign({}, x, { fold: true, ctx: { ep: x.id, task: SIMS[i][0] + ": " + SIMS[i][1] }, cid: "sim", names: NAMES[x.id], strip: b0 ? [] : x.strip, duo: b0 ? Object.assign({ ok: x.ok || (nm2 ? `Picks the ${nm2}.` : "Succeeds.") }, b0) : null }));
+      const b0 = x.strip[0], names = x.names || NAMES[x.id] || [], nm2 = names[0];
+      cur = seq(host, Object.assign({}, x, { ctx: { ep: x.id, task: SIMS[i][0] + ": " + SIMS[i][1] }, cid: "sim", names, strip: b0 ? [] : x.strip, duo: b0 ? Object.assign({ ok: x.ok || (nm2 ? `Picks the ${nm2}.` : "Succeeds."), okT: x.okT }, b0) : null }));
     }, SIMS.map((s) => s[0]));
     const TABLES = { "RoboSPA spatial-24": { "groups": ["Geometric attribute", "Spatial distance", "Position index", "Referential relation", "Cross-view", "Overall"], "sub": ["SR", "ONTA"], "rows": [{ "g": "No reasoning" }, { "m": "MolmoAct2", "v": ["36.2", "8.1", "33.8", "15.8", "36.3", "24.1", "22.8", "\u22129.5", "30.8", "10.3", "32.0", "9.8"] }, { "m": "\u03C00.5", "v": ["50.6", "30.8", "42.3", "27.3", "28.5", "14.7", "31.5|u", "5.5|u", "48.9", "33.7", "40.4", "22.4"] }, { "m": "X-VLA", "v": ["36.8", "10.8", "37.2", "20.4", "18.9", "3.2", "22.6", "\u22128.0", "45.6", "29.8", "32.2", "11.2"] }, { "m": "Pointing-VLA", "v": ["52.2|u", "32.4|u", "44.8", "30.8", "29.2", "16.1", "31.1", "4.1", "56.7|u", "43.9|u", "42.8|u", "25.4|u"] }, { "g": "Explicit reasoning" }, { "m": "ECoT-Lite\xA7", "v": ["22.6", "\u22129.7", "36.7", "20.1", "34.9", "23.8", "14.4", "\u221220.8", "31.5", "11.3", "28.0", "4.9"] }, { "m": "ECoT-Lite (CoT on)", "v": ["20.0", "\u221213.1", "38.1", "21.7", "37.9|u", "27.0|u", "15.2", "\u221220.2", "32.6", "12.6", "28.8", "5.6"] }, { "m": "ERVLA\xA7", "v": ["22.7", "\u221211.0", "46.2|u", "32.3|u", "34.5", "21.0", "24.1", "\u22127.0", "41.8", "24.7", "33.9", "12.0"] }, { "m": "ERVLA (CoT on)", "v": ["20.5", "\u221214.5", "34.6", "17.0", "29.8", "15.3", "16.8", "\u221218.3", "31.5", "11.5", "26.6", "2.2"] }, { "m": "MolmoAct2-Think", "v": ["30.1", "\u22120.9", "33.8", "15.9", "34.3", "21.5", "22.2", "\u22129.6", "20.0", "\u22123.4", "28.1", "4.7"] }, { "g": "Latent reasoning" }, { "m": "Fast-ThinkAct", "v": ["7.1", "\u221234.7", "15.9", "\u22127.2", "10.2", "\u22128.1", "4.5", "\u221236.6", "4.4", "\u221223.4", "8.4", "\u221222.0"] }, { "m": "LaRA-VLA", "v": ["31.0", "1.8", "44.7", "30.1", "36.3", "23.8", "18.2", "\u221215.3", "32.1", "12.5", "32.4", "10.6"] }, { "m": "LaST0", "v": ["13.1", "\u221225.7", "16.6", "\u22125.8", "12.0", "\u22126.0", "2.8", "\u221238.7", "8.3", "\u221218.4", "10.6", "\u221218.9"] }, { "m": "GistAct", "v": ["68.6|b", "57.6|b", "60.6|b", "50.5|b", "90.2|b", "88.6|b", "49.3|b", "30.0|b", "70.4|b", "61.5|b", "67.8|b", "57.6|b"], "me": 1 }] }, "VLABench": { "groups": ["In-distribution", "Cross-category", "Common sense", "Semantic instruction", "Unseen texture", "Overall"], "sub": ["SR", "PS", "IS"], "rows": [{ "g": "No reasoning" }, { "m": "MolmoAct2", "v": ["58.2", "69.0", "76.8", "35.6", "50.4", "61.1|b", "30.4", "44.1", "56.8", "38.2", "49.9", "64.8", "54.4", "67.1", "75.4", "43.4", "56.1", "67.0"] }, { "m": "\u03C00.5", "v": ["43.6", "60.2", "66.6", "29.4", "44.9", "58.0", "26.0", "42.0", "52.2", "28.0", "46.9", "60.5", "37.2", "54.1", "62.7", "32.8", "49.6", "60.0"] }, { "m": "X-VLA", "v": ["53.6", "71.2", "83.4|b", "20.9", "27.2", "34.6", "29.0", "46.3", "62.6|u", "44.2", "63.1", "75.6|b", "44.2", "61.2", "77.2|u", "38.4", "53.8", "66.7"] }, { "m": "Pointing-VLA", "v": ["47.8", "60.7", "66.0", "35.9", "47.1", "57.8", "29.0", "42.8", "49.2", "34.8", "51.2", "60.6", "40.0", "55.9", "65.8", "37.5", "51.5", "59.9"] }, { "g": "Explicit reasoning" }, { "m": "ECoT-Lite\xA7", "v": ["47.2", "65.8", "78.6", "28.8", "43.8", "60.3|u", "28.1", "43.9", "57.9", "35.7", "53.4", "67.5", "46.9", "63.6", "77.2|u", "37.3", "54.1", "68.3"] }, { "m": "ECoT-Lite (CoT on)", "v": ["51.2", "67.2", "77.6", "31.0", "44.7", "57.0", "31.1", "46.8", "56.9", "31.7", "49.6", "68.5", "49.5", "64.3", "76.9", "38.9", "54.5", "67.4"] }, { "m": "ERVLA\xA7", "v": ["63.0", "77.3", "81.4|u", "50.2|u", "60.4|u", "59.8", "34.0", "49.6", "55.4", "47.4", "61.3", "70.2", "57.6", "73.5|u", "78.8|b", "50.4", "64.4", "69.1|b"] }, { "m": "ERVLA (CoT on)", "v": ["62.6", "77.8|u", "80.2", "51.3|b", "62.1|b", "60.2", "36.4", "50.9", "56.0", "52.8|u", "66.2|u", "71.8", "60.4|u", "74.9|b", "77.0", "52.7|u", "66.4|u", "69.0|u"] }, { "m": "MolmoAct2-Think", "v": ["63.4|u", "76.2", "79.2", "27.6", "42.7", "53.7", "39.6|u", "51.3|u", "54.8", "43.8", "57.1", "67.2", "58.8", "72.4", "78.8|b", "46.6", "59.9", "66.7"] }, { "g": "Latent reasoning" }, { "m": "Fast-ThinkAct", "v": ["19.6", "38.3", "64.0", "8.0", "22.5", "37.7", "11.8", "28.9", "53.1", "15.2", "33.8", "58.2", "13.0", "33.0", "58.8", "13.5", "31.3", "54.4"] }, { "m": "LaRA-VLA", "v": ["43.8", "63.1", "77.6", "21.3", "37.5", "48.9", "16.8", "33.5", "47.8", "15.2", "33.1", "54.4", "20.2", "38.1", "58.4", "23.5", "41.1", "57.4"] }, { "m": "LaST0", "v": ["21.2", "44.5", "65.6", "11.7", "27.8", "42.4", "9.2", "27.9", "49.0", "3.0", "13.8", "29.0", "8.2", "23.7", "45.4", "10.7", "27.5", "46.3"] }, { "m": "GistAct", "v": ["70.8|b", "79.7|b", "76.6", "39.0", "45.5", "47.8", "53.6|b", "62.6|b", "64.5|b", "68.0|b", "76.9|b", "73.5|u", "65.6|b", "74.9|b", "74.2", "59.4|b", "67.9|b", "67.3"], "me": 1 }] } };
     const cell = (v, ov, gs) => {

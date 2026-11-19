@@ -55,12 +55,25 @@
     <video id="teaser" muted loop playsinline preload="metadata" poster="static/media/teaser.jpg" aria-label="Overview video"><source src="static/media/teaser.mp4" type="video/mp4"></video>
   </div>
   <p class="tzcap">On a real robot and in three simulators, GistAct works out instructions that name no object, where baselines guess.</p>
-  <dl class="stats" aria-label="Main results">
-    <div><dt>Real robot</dt><dd><b>66.3%</b><span>vs 47.5% π0.5</span></dd></div>
-    <div><dt>RoboSPA</dt><dd><b>67.8%</b><span>vs 42.8% Pointing-VLA</span></dd></div>
-    <div><dt>VLABench</dt><dd><b>59.4%</b><span>vs 52.7% ERVLA</span></dd></div>
-    <div><dt>Time per decision</dt><dd><b>0.15&nbsp;s</b><span>vs 15.7&nbsp;s ERVLA</span></dd></div>
-  </dl>
+  <p class="tldr"><span class="tl">TL;DR</span>GistAct thinks in a few latent states you can decode and read, marks its answer in the image, and acts on it 100× faster than reasoning in text.</p>
+  <div class="stats" role="group" aria-label="Main results">
+    <figure class="sm"><figcaption>Real robot · success</figcaption>
+      <div class="br me" style="--f:0.663" title="GistAct: 66.3%"><span>GistAct</span><i></i><b>66.3%</b></div>
+      <div class="br" style="--f:0.475" title="π0.5: 47.5%"><span>π0.5</span><i></i><b>47.5%</b></div>
+    </figure>
+    <figure class="sm"><figcaption>RoboSPA · success</figcaption>
+      <div class="br me" style="--f:0.678" title="GistAct: 67.8%"><span>GistAct</span><i></i><b>67.8%</b></div>
+      <div class="br" style="--f:0.428" title="Pointing-VLA: 42.8%"><span>Pointing-VLA</span><i></i><b>42.8%</b></div>
+    </figure>
+    <figure class="sm"><figcaption>VLABench · success</figcaption>
+      <div class="br me" style="--f:0.594" title="GistAct: 59.4%"><span>GistAct</span><i></i><b>59.4%</b></div>
+      <div class="br" style="--f:0.527" title="ERVLA: 52.7%"><span>ERVLA</span><i></i><b>52.7%</b></div>
+    </figure>
+    <figure class="sm"><figcaption>Time per decision · lower is better</figcaption>
+      <div class="br me" style="--f:0.012" title="GistAct: 0.15 s"><span>GistAct</span><i></i><b>0.15&nbsp;s</b></div>
+      <div class="br" style="--f:1.000" title="ERVLA: 15.7 s"><span>ERVLA</span><i></i><b>15.7&nbsp;s</b></div>
+    </figure>
+  </div>
 </div>
 
 <section id="overview">
@@ -151,6 +164,7 @@
 <script src="static/js/real_fr3.js" onerror="void 0"></script>
 <script src="static/js/robolab_lb.js" onerror="void 0"></script>
 <script src="static/js/sim_v2.js" onerror="void 0"></script>
+<script src="static/js/race_v3.js" onerror="void 0"></script>
 <script src="static/js/main.js"></script>
 </body>
 </html>
