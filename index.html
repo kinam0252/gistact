@@ -8,8 +8,8 @@
 <meta name="description" content="GistAct works out hard instructions in a few supervised latent states, ends on an answer drawn in the image, and acts on it at the speed of a plain policy.">
 <meta name="theme-color" content="#171613">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('gistact-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
-<link rel="stylesheet" href="static/css/style.css?v=26fe487">
-<script src="static/js/theme_toggle.js?v=26fe487"></script>
+<link rel="stylesheet" href="static/css/style.css?v=1babc58">
+<script src="static/js/theme_toggle.js?v=1babc58"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,7 +34,7 @@
 <main id="main">
 <header class="hero" id="top">
   <div class="wrap">
-    <h1><span class="acc">GistAct</span>: Thinking in Latents, Acting on Grounded Answers</h1>
+    <h1><span class="wm"><svg class="hm" viewBox="0 0 32 32" aria-hidden="true"><circle class="d1" cx="2.9" cy="29.1" r="2"/><circle class="d2" cx="7.6" cy="24.4" r="2.6"/><path class="bx" d="M11.5 7.5v-5h5M24.5 2.5h5v5M29.5 15.5v5h-5M16.5 20.5h-5v-5"/><circle class="d3" cx="20.5" cy="11.5" r="3.3"/></svg>GistAct</span><span class="st">Thinking in Latents, Acting on Grounded Answers</span></h1>
     <p class="authors"><span>Kinam Kim<sup>1,2</sup></span> <span>Minho Park<sup>2</sup></span> <span>Min-Hung Chen<sup>1</sup></span> <span>Zhiding Yu<sup>1</sup></span> <span>Fu-En Yang<sup>1</sup></span> <span>Yu-Chiang Frank Wang<sup>1</sup></span> <span>Jaegul Choo<sup>2</sup></span> <span>Chi-Pin Huang<sup>1</sup></span></p>
     <div class="meta">
     <div class="affils">
@@ -50,10 +50,12 @@
   </div>
 </header>
 
-<div class="wrap tz">
+<div class="wrap wide tz">
   <div class="teaser">
-    <video id="teaser" muted loop playsinline preload="metadata" poster="static/media/teaser.jpg?v=26fe487" aria-label="Overview video"><source src="static/media/teaser.mp4?v=26fe487" type="video/mp4"></video>
+    <video id="teaser" muted loop playsinline preload="metadata" poster="static/media/teaser.jpg?v=1babc58" aria-label="Overview video"><source src="static/media/teaser.mp4?v=1babc58" type="video/mp4"></video>
   </div>
+</div>
+<div class="wrap">
   <p class="tzcap">On a real robot and in three simulators, GistAct finds the right object even when the instruction never names it.</p>
   <p class="tldr"><span class="tl">TL;DR</span>GistAct thinks in a few latent states you can decode and read, marks its answer in the image, and acts on it 100× faster than explicit reasoning.</p>
   <div class="stats card" role="group" aria-label="Main results">
@@ -109,7 +111,8 @@
     </div>
     <div class="sub" id="speed">
       <div class="head rv"><h3>Explicit reasoning is slow.</h3></div>
-      <div class="card"><div class="race rv" id="race"></div></div>
+      <div class="card"><div class="race rv" id="race"></div>
+        <div class="chartblk rv"><p class="chcap">Time per decision with reasoning on at test time, log scale (median, one H100, batch size one).</p><div id="latChart"></div></div></div>
     </div>
     <div class="sub" id="steer">
       <div class="head rv"><h3>Edit one Think state, and the arm follows.</h3></div>
@@ -117,6 +120,12 @@
       <div class="rv" id="steerPlayer"></div>
       <p class="stat rv"><b>87.0%</b> of episodes follow the edited Think, vs. <b>21.6%</b> without Think supervision.</p>
       </div>
+    </div>
+    <div class="sub" id="look">
+      <div class="head rv"><h3>The answer moves the action expert’s attention onto the target.</h3></div>
+      <div class="card"><div class="rv" id="attnPanel"></div>
+      <p class="stat rv">With the answer, the expert puts <b>51–53%</b> of its attention on the scene grid, against <b>34–36%</b> without it, and the added attention follows the answer map (r ≥ 0.99).</p>
+      <p class="chcap rv">RoboSPA, the first Think decision of each episode, on the camera the model reads. Both runs use the same inputs and the same flow noise.</p></div>
     </div>
     <div class="sub" id="ablate">
       <div class="head rv"><h3>Think helps only when its states are supervised.</h3></div>
@@ -159,16 +168,18 @@
 </main>
 
 
-<script src="static/js/data.js?v=26fe487"></script>
-<script src="static/js/think.js?v=26fe487" onerror="void 0"></script>
-<script src="static/js/real_v2.js?v=26fe487" onerror="void 0"></script>
-<script src="static/js/real_baselines.js?v=26fe487" onerror="void 0"></script>
-<script src="static/js/edit_v2.js?v=26fe487" onerror="void 0"></script>
-<script src="static/js/grasp.js?v=26fe487" onerror="void 0"></script>
-<script src="static/js/real_fr3.js?v=26fe487" onerror="void 0"></script>
-<script src="static/js/robolab_lb.js?v=26fe487" onerror="void 0"></script>
-<script src="static/js/sim_v2.js?v=26fe487" onerror="void 0"></script>
-<script src="static/js/race_v3.js?v=26fe487" onerror="void 0"></script>
-<script src="static/js/main.js?v=26fe487"></script>
+<script src="static/js/data.js?v=1babc58"></script>
+<script src="static/js/think.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/real_v2.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/real_baselines.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/edit_v2.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/grasp.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/real_fr3.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/robolab_lb.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/sim_v2.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/race_v3.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/attn.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/extras.js?v=1babc58" onerror="void 0"></script>
+<script src="static/js/main.js?v=1babc58"></script>
 </body>
 </html>
