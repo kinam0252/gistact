@@ -738,7 +738,7 @@
       l.append(el("div", "who", `<b>${name}</b><span class="lab">${sub}</span>`), vb.box, el("p", "st"));
       return { l, vb, v: vb.v, st: $(".st", l) };
     };
-    const A = lane("Text Reasoning VLA", "writes out its reasoning", CT, false), B = lane("GistAct", "thinks in latent states", ME, true);
+    const A = lane("Explicit Reasoning VLA", "writes out its reasoning", CT, false), B = lane("GistAct", "thinks in latent states", ME, true);
     [A.v, B.v].forEach((v) => {
       v.preload = "auto";
     });
@@ -1016,7 +1016,7 @@
       return `<div class="tscroll"><table class="res big"><thead><tr><th rowspan="2">Method</th>${t.groups.map((g, i) => `<th colspan="${n}" class="gh gs${i === t.groups.length - 1 ? " ov" : ""}">${esc(g)}</th>`).join("")}</tr><tr>${t.groups.map((g, i) => t.sub.map((x, j) => `<th class="${[i === t.groups.length - 1 ? "ov" : "", j ? "" : "gs"].join(" ").trim()}"><abbr title="${ABBR[x] || ""}">${esc(x)}</abbr></th>`).join("")).join("")}</tr></thead><tbody>` + t.rows.map((r) => r.g ? `<tr class="grp"><td colspan="${N}">${esc(r.g)}</td></tr>` : `<tr class="${r.me ? "me" : ""}"><td>${nm(r.m)}</td>${r.v.map((v, j) => cell(v, j >= ovAt, j % n === 0)).join("")}</tr>`).join("") + "</tbody></table></div>";
     };
     const tw = $("#simTable");
-    tw.innerHTML = '<div class="tabs ttabs" role="tablist" aria-label="Results table"></div><div class="tbody"></div><p class="tnote"><span class="tdef"></span> Bold: best. Underlined: second. <sup>\xA7</sup> Reasoning disabled at test time; CoT-on rows reason at every decision. <sup>\u2020</sup> ERVLA (CoT on) is the Text Reasoning VLA in the videos.</p>';
+    tw.innerHTML = '<div class="tabs ttabs" role="tablist" aria-label="Results table"></div><div class="tbody"></div><p class="tnote"><span class="tdef"></span> Bold: best. Underlined: second. <sup>\xA7</sup> Reasoning disabled at test time; CoT-on rows reason at every decision. <sup>\u2020</sup> ERVLA (CoT on) is the Explicit Reasoning VLA in the videos.</p>';
     tablePick = chips($(".ttabs", tw), Object.keys(TABLES).map(esc), (i) => {
       $(".tbody", tw).innerHTML = tableHtml(Object.values(TABLES)[i]);
       $(".tdef", tw).textContent = NOTES[Object.keys(TABLES)[i]];

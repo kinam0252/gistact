@@ -2334,3 +2334,21 @@ table.res.big {
 .dout.ok .obj {
   color: var(--acc);
 }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--r) + 6px);
+  padding: clamp(16px, 3vw, 32px);
+}
+.card > :last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 640px) {
+  .card {
+    padding: 14px;
+    border-radius: var(--r);
+  }
+}
+.card .dtag {
+  background: var(--panel);
+}

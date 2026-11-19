@@ -55,8 +55,8 @@
     <video id="teaser" muted loop playsinline preload="metadata" poster="static/media/teaser.jpg" aria-label="Overview video"><source src="static/media/teaser.mp4" type="video/mp4"></video>
   </div>
   <p class="tzcap">On a real robot and in three simulators, GistAct finds the right object even when the instruction never names it.</p>
-  <p class="tldr"><span class="tl">TL;DR</span>GistAct thinks in a few latent states you can decode and read, marks its answer in the image, and acts on it 100× faster than reasoning in text.</p>
-  <div class="stats" role="group" aria-label="Main results">
+  <p class="tldr"><span class="tl">TL;DR</span>GistAct thinks in a few latent states you can decode and read, marks its answer in the image, and acts on it 100× faster than explicit reasoning.</p>
+  <div class="stats card" role="group" aria-label="Main results">
     <figure class="sm"><figcaption>Real robot · success</figcaption>
       <div class="br me" style="--f:0.663" title="GistAct: 66.3%"><span>GistAct</span><i></i><b>66.3%</b></div>
       <div class="br" style="--f:0.475" title="π0.5: 47.5%"><span>π0.5</span><i></i><b>47.5%</b></div>
@@ -82,8 +82,10 @@
       <p class="eyebrow"><i>01</i>Overview</p>
       <h2>Reason in a few latent steps, mark the target, then act.</h2>
     </div>
+    <div class="card">
     <div class="fig rv" id="fig"></div>
     <details class="more figcap rv"><summary>How the states are trained</summary><div class="train" id="trainFig"></div></details>
+    </div>
   </div>
 </section>
 
@@ -106,23 +108,25 @@
       <h2>Think is fast, and editing it steers the arm.</h2>
     </div>
     <div class="sub" id="speed">
-      <div class="head rv"><h3>Reasoning in text is slow.</h3></div>
-      <div class="race rv" id="race"></div>
+      <div class="head rv"><h3>Explicit reasoning is slow.</h3></div>
+      <div class="card"><div class="race rv" id="race"></div></div>
     </div>
     <div class="sub" id="steer">
       <div class="head rv"><h3>Edit one Think state, and the arm follows.</h3></div>
+      <div class="card">
       <div class="rv" id="steerPlayer"></div>
       <p class="stat rv"><b>87.0%</b> of episodes follow the edited Think, vs. <b>21.6%</b> without Think supervision.</p>
+      </div>
     </div>
     <div class="sub" id="ablate">
       <div class="head rv"><h3>Think helps only when its states are supervised.</h3></div>
-      <figure class="abl rv">
+      <div class="card"><figure class="abl rv">
         <div class="ar"><span>Act only (no Think)</span><i style="--v:40.2"></i><b>40.2</b></div>
         <div class="ar"><span>+ latent Think, unsupervised</span><i style="--v:34.1"></i><b>34.1</b></div>
         <div class="ar"><span>+ supervised Think states</span><i style="--v:55.0"></i><b>55.0</b></div>
         <div class="ar me"><span>GistAct</span><i style="--v:67.8"></i><b>67.8</b></div>
         <figcaption>RoboSPA success (%), one component added per row.</figcaption>
-      </figure>
+      </figure></div>
     </div>
   </div>
 </section>
